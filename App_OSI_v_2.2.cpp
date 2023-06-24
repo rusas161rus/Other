@@ -10,16 +10,8 @@
 #include <vector>
 #include <Urlmon.h>
 
-//#define CURL_STATICLIB // Указывает компилятору использовать статическую версию библиотеки libcurl.
-//#include <curl/curl.h>
-
 #pragma comment(lib, "urlmon.lib")
-
 #pragma comment (lib, "Wscapi.lib")
-//#pragma comment (lib, "Normaliz.lib")
-//#pragma comment (lib, "Ws2_32.lib")
-//#pragma comment (lib, "Wldap32.lib")
-//#pragma comment (lib, "Crypt32.lib")
 #pragma comment (lib, "Version.lib")
 #pragma comment (lib, "wininet.lib")
 
@@ -180,27 +172,6 @@ std::string GetFileVersion(const std::string& filePath) {
     return "";
 }
 
-/*std::string DownloadFile(const std::string& url) {
-    CURL* curl = curl_easy_init();
-    if (curl) {
-        std::string response;
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);        
-
-        CURLcode result = curl_easy_perform(curl);
-
-        curl_easy_cleanup(curl);
-
-        if (result == CURLE_OK) {
-            return response;
-        }
-    }
-
-    return "";
-}*/
-
 int main() {    
     getHealth();
     std::string verYandexBrowserOutput = ExecuteCommand("reg query \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\YandexBrowser\" /v DisplayVersion");
@@ -219,47 +190,25 @@ int main() {
     }
     else {
         std::cout << "Failed to get Current browser version." << std::endl;
-    }   
+    } 
+
+    // Спросить у пользователя, нужно ли удалить файл
+    std::cout << "Do you want to delete the downloaded file? (Y/N): ";
+    char choice;
+    std::cin >> choice;
     
-    //std::string fileUrl = "https://browser.yandex.ru/download?banerid=0500000134&statpromo=true&partner_id=exp_inst_2";  // Замените на ссылку на скачиваемый файл
-    //std::string filePath = "ya.exe";  // Замените на путь, куда сохранить скачанный файл
-
-    /*std::string downloadedFile = DownloadFile(fileUrl);
-    if (!downloadedFile.empty()) {
-        // Сохранение скачанного файла
-        std::ofstream fileStream(filePath, std::ios::binary);
-        fileStream << downloadedFile;
-        fileStream.close();
-
-        // Получение версии файла
-        std::string fileVersion = GetFileVersion(filePath);
-        if (!fileVersion.empty()) {
-            std::cout << "Current browser version: " << fileVersion << std::endl;
+    if (choice == 'Y' || choice == 'y') {
+        if (std::remove(filePath.c_str()) != 0) {
+            std::cerr << "Failed to delete the file." << std::endl;
         }
         else {
-            std::cout << "Failed to get Current browser version." << std::endl;
-        }
-
-        // Спрашиваем пользователя, удалить или оставить файл
-        /*std::cout << "Do you want to delete the downloaded file? (Y/N): ";
-        std::string userInput;
-        std::cin >> userInput;
-        if (userInput == "Y" || userInput == "y") {
-            // Удаляем файл
-            if (std::remove(filePath.c_str()) == 0) {
-                std::cout << "File deleted." << std::endl;
-            }
-            else {
-                std::cout << "Failed to delete the file." << std::endl;
-            }
-        }
-        else {
-            std::cout << "File kept." << std::endl;
+            std::cout << "File deleted successfully." << std::endl;
         }
     }
     else {
-        std::cout << "Failed to download file." << std::endl;
-    }*/
+        std::cout << "File kept." << std::endl;
+    }
+    std::cin.ignore(); // Очистить буфер ввода
 
     std::string verOutput = ExecuteCommand("ver");
     std::cout << verOutput << std::endl;
@@ -279,8 +228,7 @@ int main() {
         SetConsoleOutputCP(437);  // Кодировка для Windows 7
     }
 
-    // Установка кодировки вывода консоли
-    //SetConsoleOutputCP(1252);
+    // Установка кодировки вывода консоли    
     std::ofstream logFile("log.txt", std::ios::out | std::ios::binary);
 
     if (!logFile) {
@@ -331,8 +279,6 @@ int main() {
     std::string szNetstat_Command = "netstat -p TCP -n | findstr \":5060 :4054\"";
     std::string szIpconfig_Command = "cmd /c ipconfig";
     std::string szSysteminfo_String = "cmd /c systeminfo ";
-    //string szTasklist_String =  "cmd /c Tasklist ";
-    //string szChkdsk_String = "cmd /c chkdsk ";
     std::string szAudio_String = "cmd /c driverquery | findstr /i audio ";
 
     szPing_String.append(szHost);
@@ -370,14 +316,6 @@ int main() {
         ping_statistics_buffer << pipeOutput.substr(statisticsPos);
         ping_result_buffer << pipeOutput.substr(0, statisticsPos);
     }
-
-    //pipeOutput = executeCommandAndGetOutput(szChkdsk_String);
-    //std::cout << pipeOutput;
-    //packet_process_buffer << pipeOutput;
-
-    //pipeOutput = executeCommandAndGetOutput(szTasklist_String);
-    //std::cout << pipeOutput;
-    //packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szCurl0_Command);
     std::cout << pipeOutput;
