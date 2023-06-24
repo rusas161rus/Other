@@ -20,10 +20,10 @@
 #pragma comment (lib,"Crypt32.lib")
 #pragma comment (lib,"Version.lib")
 
-using namespace std;
+
 #define BUFF_LEN 1024
 
-string printStatus(WSC_SECURITY_PROVIDER_HEALTH status) {
+std::string printStatus(WSC_SECURITY_PROVIDER_HEALTH status) {
     switch (status) {
     case WSC_SECURITY_PROVIDER_HEALTH_GOOD: return "INCLUDED";
     case WSC_SECURITY_PROVIDER_HEALTH_NOTMONITORED: return "NOTMONITORED";
@@ -36,32 +36,32 @@ string printStatus(WSC_SECURITY_PROVIDER_HEALTH status) {
 void getHealth() {
     WSC_SECURITY_PROVIDER_HEALTH health;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_FIREWALL, &health))
-        cout << "FIREWALL:          " << printStatus(health) << endl;
+        std::cout << "FIREWALL:          " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_AUTOUPDATE_SETTINGS, &health))
-        cout << "AUTOUPDATE:        " << printStatus(health) << endl;
+        std::cout << "AUTOUPDATE:        " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_ANTIVIRUS, &health))
-        cout << "ANTIVIRUS:         " << printStatus(health) << endl;
+        std::cout << "ANTIVIRUS:         " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_ANTISPYWARE, &health))
-        cout << "ANTISPYWARE:       " << printStatus(health) << endl;
+        std::cout << "ANTISPYWARE:       " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_INTERNET_SETTINGS, &health))
-        cout << "INTERNET SETTINGS: " << printStatus(health) << endl;
+        std::cout << "INTERNET SETTINGS: " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_USER_ACCOUNT_CONTROL, &health))
-        cout << "UAC:               " << printStatus(health) << endl;
+        std::cout << "UAC:               " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_SERVICE, &health))
-        cout << "SERVICE:           " << printStatus(health) << endl;
+        std::cout << "SERVICE:           " << printStatus(health) << std::endl;
     if (S_OK == WscGetSecurityProviderHealth(WSC_SECURITY_PROVIDER_ALL, &health))
-        cout << "ALL:               " << printStatus(health) << endl;
-    cout << "\n\n";
+        std::cout << "ALL:               " << printStatus(health) << std::endl;
+    std::cout << "\n\n";
 }
 
-void mergeFiles(const string& file1Path, const string& file2Path, const string& file3Path, const string& outputPath) {
-    ifstream file1(file1Path);
-    ifstream file2(file2Path);
-    ifstream file3(file3Path);
-    ofstream combined(outputPath, ios::app); // Открываем файл на добавление
+void mergeFiles(const std::string& file1Path, const std::string& file2Path, const std::string& file3Path, const std::string& outputPath) {
+    std::ifstream file1(file1Path);
+    std::ifstream file2(file2Path);
+    std::ifstream file3(file3Path);
+    std::ofstream combined(outputPath, std::ios::app); // Открываем файл на добавление
 
     if (file1 && file2 && file3 && combined) {
-        string line;
+        std::string line;
 
         // Запись метки перед file1.txt
         combined << "\n\n=== Содержимое curl_4054.txt ===\n\n" << '\n';
@@ -75,7 +75,7 @@ void mergeFiles(const string& file1Path, const string& file2Path, const string& 
         combined << "\n\n=== Содержимое curl_5060.txt ===\n\n" << '\n';
 
         // Запись содержимого file2.txt
-        while (getline(file2, line)) {
+        while (std::getline(file2, line)) {
             combined << line << '\n';
         }
 
@@ -83,14 +83,14 @@ void mergeFiles(const string& file1Path, const string& file2Path, const string& 
         combined << "\n\n === Содержимое log.txt === \n\n" << '\n';
 
         // Запись содержимого file3.txt
-        while (getline(file3, line)) {
+        while (std::getline(file3, line)) {
             combined << line << '\n';
         }
 
-        cout << "Files merged successfully." << endl;
+        std::cout << "Files merged successfully." << std::endl;
     }
     else {
-        cout << "Error opening files." << endl;
+        std::cout << "Error opening files." << std::endl;
     }
 
     // Закрытие файлов
@@ -105,7 +105,7 @@ void mergeFiles(const string& file1Path, const string& file2Path, const string& 
     remove(file3Path.c_str());
 }
 
-string ExecuteCommand(const string& command) {
+std::string ExecuteCommand(const std::string& command) {
     FILE* pipe = _popen(command.c_str(), "r");
     if (!pipe) {
         return "Failed to execute command: " + command;
@@ -113,7 +113,7 @@ string ExecuteCommand(const string& command) {
 
     const int bufferSize = 128;
     char buffer[bufferSize];
-    string output;
+    std::string output;
 
     while (fgets(buffer, bufferSize, pipe)) {
         output += buffer;
@@ -124,20 +124,20 @@ string ExecuteCommand(const string& command) {
     return output;
 }
 
-auto executeCommandAndGetOutput(const string& command) {
-    array<char, 128> buffer;
-    string result;
+auto executeCommandAndGetOutput(const std::string& command) {
+    std::array<char, 128> buffer;
+    std::string result;
 
     FILE* pipe = _popen(command.c_str(), "r");
     if (pipe) {
         while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr) {
-            cout << buffer.data();
+            std::cout << buffer.data();
             result += buffer.data();
         }
         _pclose(pipe);
     }
     else {
-        cerr << "Error executing command: " << command << endl;
+        std::cerr << "Error executing command: " << command << std::endl;
     }
 
     return result;
@@ -200,8 +200,8 @@ std::string DownloadFile(const std::string& url) {
 
 int main() {
     getHealth();    
-    string verYandexBrowserOutput = ExecuteCommand("reg query \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\YandexBrowser\" /v DisplayVersion");
-    cout << verYandexBrowserOutput << endl;
+    std::string verYandexBrowserOutput = ExecuteCommand("reg query \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\YandexBrowser\" /v DisplayVersion");
+    std::cout << verYandexBrowserOutput << std::endl;
     std::string fileUrl = "https://browser.yandex.ru/download?banerid=0500000134&statpromo=true&partner_id=exp_inst_2";  // Замените на ссылку на скачиваемый файл
     std::string filePath = "ya.exe";  // Замените на путь, куда сохранить скачанный файл
 
@@ -225,10 +225,10 @@ int main() {
         std::cout << "Failed to download file." << std::endl;
     }
     
-    string verOutput = ExecuteCommand("ver");
-    cout << verOutput << endl;
-    string audioOutput = ExecuteCommand("driverquery | findstr /i audio");
-    cout << audioOutput << endl;
+    std::string verOutput = ExecuteCommand("ver");
+    std::cout << verOutput << std::endl;
+    std::string audioOutput = ExecuteCommand("driverquery | findstr /i audio");
+    std::cout << audioOutput << std::endl;
     char szHost[BUFF_LEN] = { 0 };
 
     // Получаем дескриптор консоли
@@ -245,25 +245,25 @@ int main() {
 
     // Установка кодировки вывода консоли
     //SetConsoleOutputCP(1252);
-    ofstream logFile("log.txt", ios::out | ios::binary);
+    std::ofstream logFile("log.txt", std::ios::out | std::ios::binary);
 
     if (!logFile) {
-        cerr << "Error opening log file" << endl;
+        std::cerr << "Error opening log file" << std::endl;
         return 1;
     }
 
-    cout << "Choose a server\n";
-    cout << "1. Altair\n";
-    cout << "2. Capella\n";
-    cout << "3. Mimosa\n";
-    cout << "4. Sirius\n";
-    cout << "Empter a ping Host or IP Addr:\t";
-    cin.getline(szHost, BUFF_LEN);
-    cout << endl;
+    std::cout << "Choose a server\n";
+    std::cout << "1. Altair\n";
+    std::cout << "2. Capella\n";
+    std::cout << "3. Mimosa\n";
+    std::cout << "4. Sirius\n";
+    std::cout << "Empter a ping Host or IP Addr:\t";
+    std::cin.getline(szHost, BUFF_LEN);
+    std::cout << std::endl;
 
-    string szPing_String = "cmd /c ping -n 50 ";
-    string szTracer_String = "cmd /c tracert ";
-    string szIP_Address;
+    std::string szPing_String = "cmd /c ping -n 50 ";
+    std::string szTracer_String = "cmd /c tracert ";
+    std::string szIP_Address;
 
     if (szHost[0] == '\0') {
         strcpy_s(szHost, "ya.ru");
@@ -271,85 +271,85 @@ int main() {
     else if (szHost[0] == '1') {
         strcpy_s(szHost, "xxxxx");
         szIP_Address = "xxxxx";
-        cout << "Wait for the procedure to complete" << endl;
+        std::cout << "Wait for the procedure to complete" << std::endl;
     }
     else if (szHost[0] == '2') {
         strcpy_s(szHost, "xxxxx");
         szIP_Address = "xxxxx";
-        cout << "Wait for the procedure to complete" << endl;
+        std::cout << "Wait for the procedure to complete" << std::endl;
     }
     else if (szHost[0] == '3') {
         strcpy_s(szHost, "xxxxx");
         szIP_Address = "xxxxx";
-        cout << "Wait for the procedure to complete" << endl;
+        std::cout << "Wait for the procedure to complete" << std::endl;
     }
     else if (szHost[0] == '4') {
         strcpy_s(szHost, "xxxxx");
         szIP_Address = "xxxxx";
-        cout << "Wait for the procedure to complete" << endl;
+        std::cout << "Wait for the procedure to complete" << std::endl;
     }
 
-    string szPing_Command = szPing_String + szHost;
-    string szTracer_Command = szTracer_String + szIP_Address;
-    string szCurl0_Command = "curl -k -v --max-time 5 --trace-ascii \"%USERPROFILE%\\Desktop\\curl_4054.txt\" " + szIP_Address + ":4054";
-    string szCurl1_Command = "curl -k -v --max-time 5 --trace-ascii \"%USERPROFILE%\\Desktop\\curl_5060.txt\" " + szIP_Address + ":5060";
-    string szNetstat_Command = "netstat -p TCP -n | findstr \":5060 :4054\"";
-    string szIpconfig_Command = "cmd /c ipconfig";
-    string szSysteminfo_String = "cmd /c systeminfo ";
+    std::string szPing_Command = szPing_String + szHost;
+    std::string szTracer_Command = szTracer_String + szIP_Address;
+    std::string szCurl0_Command = "curl -k -v --max-time 5 --trace-ascii \"%USERPROFILE%\\Desktop\\curl_4054.txt\" " + szIP_Address + ":4054";
+    std::string szCurl1_Command = "curl -k -v --max-time 5 --trace-ascii \"%USERPROFILE%\\Desktop\\curl_5060.txt\" " + szIP_Address + ":5060";
+    std::string szNetstat_Command = "netstat -p TCP -n | findstr \":5060 :4054\"";
+    std::string szIpconfig_Command = "cmd /c ipconfig";
+    std::string szSysteminfo_String = "cmd /c systeminfo ";
     //string szTasklist_String =  "cmd /c Tasklist ";
     //string szChkdsk_String = "cmd /c chkdsk ";
-    string szAudio_String = "cmd /c driverquery | findstr /i audio ";
+    std::string szAudio_String = "cmd /c driverquery | findstr /i audio ";
 
     szPing_String.append(szHost);
-    ostringstream packet_process_buffer;
-    ostringstream ping_statistics_buffer;
-    ostringstream ping_result_buffer;
-    ostringstream curl_buffer;
+    std::ostringstream packet_process_buffer;
+    std::ostringstream ping_statistics_buffer;
+    std::ostringstream ping_result_buffer;
+    std::ostringstream curl_buffer;
 
-    string pipeOutput;
+    std::string pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szTracer_Command);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szAudio_String);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szNetstat_Command);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szIpconfig_Command);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szSysteminfo_String);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szPing_Command);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     size_t statisticsPos = pipeOutput.find("Ping statistics for");
-    if (statisticsPos != string::npos) {
+    if (statisticsPos != std::string::npos) {
         ping_statistics_buffer << pipeOutput.substr(statisticsPos);
         ping_result_buffer << pipeOutput.substr(0, statisticsPos);
     }
 
     //pipeOutput = executeCommandAndGetOutput(szChkdsk_String);
-    //cout << pipeOutput;
+    //std::cout << pipeOutput;
     //packet_process_buffer << pipeOutput;
 
     //pipeOutput = executeCommandAndGetOutput(szTasklist_String);
-    //cout << pipeOutput;
+    //std::cout << pipeOutput;
     //packet_process_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szCurl0_Command);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     curl_buffer << pipeOutput;
 
     pipeOutput = executeCommandAndGetOutput(szCurl1_Command);
-    cout << pipeOutput;
+    std::cout << pipeOutput;
     curl_buffer << pipeOutput;
 
     // Запись в файл всех буферов
@@ -360,14 +360,14 @@ int main() {
 
     logFile.close();
 
-    string file2Path = "curl_4054.txt";
-    string file3Path = "curl_5060.txt";
-    string file1Path = "log.txt";
-    string outputPath = "log_end.txt";
+    std::string file2Path = "curl_4054.txt";
+    std::string file3Path = "curl_5060.txt";
+    std::string file1Path = "log.txt";
+    std::string outputPath = "log_end.txt";
     mergeFiles(file2Path, file3Path, file1Path, outputPath);
 
-    cout << "\nResults written to log_end.txt" << endl;
-    cout << "\ndone, this window can be closed" << endl;
+    std::cout << "\nResults written to log_end.txt" << std::endl;
+    std::cout << "\ndone, this window can be closed" << std::endl;
    
     system("PAUSE");
     return 0;
